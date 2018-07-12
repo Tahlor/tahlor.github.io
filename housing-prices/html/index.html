@@ -36,32 +36,48 @@
 <div class="toctree-wrapper compound">
 </div>
 <span class="target" id="module-housing_prices.prep_features"></span><dl class="function">
-<dt id="housing_prices.prep_features.create_market_index">
-<code class="descclassname">housing_prices.prep_features.</code><code class="descname">create_market_index</code><span class="sig-paren">(</span><em>features, index_name='time', vars=['Season', 'YrSold']</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.create_market_index" title="Permalink to this definition">¶</a></dt>
+<dt id="housing_prices.prep_features.additional_transforms">
+<code class="descclassname">housing_prices.prep_features.</code><code class="descname">additional_transforms</code><span class="sig-paren">(</span><em>df</em>, <em>variable_combinations</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.additional_transforms" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="docutils">
-<dt>Perform all data preprocessing steps, including:</dt>
-<dd><ul class="first last simple">
-<li>Recoding variables, e.g. converting categorical to ordinal variables</li>
-<li>Create novel features by combining old ones</li>
-<li>Standardize features - Drop outliers, drop features, set feature types (e.g. categorical)</li>
-<li>Impute missing variables</li>
-<li>Create dummy/one-hot-encoded variables</li>
-<li>“Rectangularize” data by ensuring train/test have the same features</li>
-<li>Scale, transform, or normalize features</li>
-</ul>
-</dd>
-<dt>Args:</dt>
-<dd>training_df (DataFrame): The dataframe containing training data.
-test_df (DataFrame): The dataframe containing training data.</dd>
-<dt>Returns:</dt>
+<dt>Take a list of variable names with defined transformations, and recreate these transforms</dt>
 <dd><dl class="first last docutils">
-<dt>(tuple): tuple containing:</dt>
-<dd>training_df(DataFrame): Processed features (X) for training data
-targets (DataFrame): Processed targets (y) for training data
-test_df(DataFrame): Processed features for test set
-test_targets (DataFrame): Processed targets for test set</dd>
+<dt>E.g.: A variable like var1_trans_quadratic_multiply_var2_trans_cubic_multiply would yield a new feature, defined by:</dt>
+<dd>var1**2 * var2**3</dd>
 </dl>
 </dd>
+<dt>Args:</dt>
+<dd>df (DataFrame): The dataframe containing features data.
+variable_combinations (list): List (str) of variables defined as above</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: DataFrame with original + newly created features</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.prep_features.check_for_missing">
+<code class="descclassname">housing_prices.prep_features.</code><code class="descname">check_for_missing</code><span class="sig-paren">(</span><em>df</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.check_for_missing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Assert dataframe has no missing numeric values.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (DataFrame): Dataframe to check</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+<dt>Exception:</dt>
+<dd>Assertion exception if dataframe has missing numeric values</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.prep_features.create_market_index">
+<code class="descclassname">housing_prices.prep_features.</code><code class="descname">create_market_index</code><span class="sig-paren">(</span><em>features, index_name='time', vars=['Season', 'YrSold']</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.create_market_index" title="Permalink to this definition">¶</a></dt>
+<dd><p>Create e.g. temporal/geographical index variables, mapping average prices against another variable</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>features (DataFrame): The dataframe containing features data.
+index_name (str, optional): the name of the index
+vars (list, optional): List (str) of “key” variables to merge index on</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: DataFrame with index values by “key” variables in vars list</dd>
 </dl>
 </dd></dl>
 
@@ -146,6 +162,19 @@ inverse (bool): Return all variables that don’t match search string</dd>
 </dd></dl>
 
 <dl class="function">
+<dt id="housing_prices.prep_features.impute">
+<code class="descclassname">housing_prices.prep_features.</code><code class="descname">impute</code><span class="sig-paren">(</span><em>df</em>, <em>strategy='median'</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.impute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Impute numerical variables.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (DataFrame): Dataframe with features to impute
+strategy (str): Imputation method (e.g. median, mean etc.)</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: DataFrame with imptued values</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
 <dt id="housing_prices.prep_features.impute_missings">
 <code class="descclassname">housing_prices.prep_features.</code><code class="descname">impute_missings</code><span class="sig-paren">(</span><em>features</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.impute_missings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Method that takes a dictionary mapping current feature values to desired values.</p>
@@ -220,15 +249,16 @@ missing (value): A value to fill missing observations</dd>
 </dd></dl>
 
 <dl class="function">
-<dt id="housing_prices.prep_features.smart_impute">
-<code class="descclassname">housing_prices.prep_features.</code><code class="descname">smart_impute</code><span class="sig-paren">(</span><em>features</em>, <em>features_to_impute=[]</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.smart_impute" title="Permalink to this definition">¶</a></dt>
-<dd><p>Impute missing values using MICE.</p>
+<dt id="housing_prices.prep_features.specific_transform">
+<code class="descclassname">housing_prices.prep_features.</code><code class="descname">specific_transform</code><span class="sig-paren">(</span><em>features</em>, <em>column_name</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.prep_features.specific_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Backout transformation from variable name. Pretty messy.</p>
 <dl class="docutils">
 <dt>Args:</dt>
-<dd>features (DataFrame): The dataframe containing data to impute.
-features_to_impute (list): List of string features to impute. If empty, all floats are imputed.</dd>
+<dd>features (DataFrame): Dataframe with base features
+column_name (str): Name of column from which to derive transformation
+verbose (int, optional): Verbose messages for verbose&gt;0</dd>
 <dt>Returns:</dt>
-<dd>DataFrame: All features, with newly recoded features</dd>
+<dd>DataFrame: DataFrame with only the newly created variable</dd>
 </dl>
 </dd></dl>
 
@@ -245,13 +275,57 @@ path (string): The location to save the download.</dd>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-housing_prices.export_data"></span><dl class="function">
-<dt id="housing_prices.export_data.find_files">
-<code class="descclassname">housing_prices.export_data.</code><code class="descname">find_files</code><span class="sig-paren">(</span><em>base</em>, <em>pattern</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.export_data.find_files" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return list of files matching pattern in base folder.</p>
+<span class="target" id="module-housing_prices.export_data"></span><span class="target" id="module-housing_prices.utils"></span><dl class="function">
+<dt id="housing_prices.utils.checkEqual">
+<code class="descclassname">housing_prices.utils.</code><code class="descname">checkEqual</code><span class="sig-paren">(</span><em>L1</em>, <em>L2</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.utils.checkEqual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compare lists for equal elements (ignore order).</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>L1 (list): first list
+L2 (list): second list</dd>
+<dt>Returns:</dt>
+<dd>bool: whether lists are equal</dd>
+</dl>
 </dd></dl>
 
-<span class="target" id="module-housing_prices.reset_seed"></span><span class="target" id="module-housing_prices.utils"></span><span class="target" id="module-housing_prices.model"></span><p>A lightweight wrapper for a Sci-kit learn learner</p>
+<dl class="function">
+<dt id="housing_prices.utils.drop_features">
+<code class="descclassname">housing_prices.utils.</code><code class="descname">drop_features</code><span class="sig-paren">(</span><em>features</em>, <em>ignore_features</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.utils.drop_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Try to drop features that should be excluded from model, will not throw an error if variable not found</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>features (DataFrame): A DataFrame with features.
+ignore_features (list): A list (str) with features to exclude from DataFrame</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: DataFrame without features in ignore_features list</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.utils.invert_dictionary">
+<code class="descclassname">housing_prices.utils.</code><code class="descname">invert_dictionary</code><span class="sig-paren">(</span><em>d</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.utils.invert_dictionary" title="Permalink to this definition">¶</a></dt>
+<dd><p>Swap keys and values in dictionary, where values are a list. Lists should be mutually exclusive.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>d (dict): Original dictionary, with key:[list] pairs</dd>
+<dt>Returns:</dt>
+<dd>dict: An inverted dictionary, where each element of list is a key, and the former key is the value</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.utils.reset_seed">
+<code class="descclassname">housing_prices.utils.</code><code class="descname">reset_seed</code><span class="sig-paren">(</span><em>seed=42</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.utils.reset_seed" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set all possible random seeds to reproduce results.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>seed (int): random seed</dd>
+<dt>Returns:</dt>
+<dd>None</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-housing_prices.model"></span><p>A lightweight wrapper for a Sci-kit learn learner</p>
 <span class="target" id="module-housing_prices.import_data"></span><dl class="function">
 <dt id="housing_prices.import_data.process_data">
 <code class="descclassname">housing_prices.import_data.</code><code class="descname">process_data</code><span class="sig-paren">(</span><em>path</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.import_data.process_data" title="Permalink to this definition">¶</a></dt>
@@ -264,9 +338,87 @@ path (string): The location to save the download.</dd>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-housing_prices.transforms"></span><span class="target" id="module-housing_prices.main"></span><dl class="function">
+<span class="target" id="module-housing_prices.transforms"></span><dl class="function">
+<dt id="housing_prices.transforms.perform_operations">
+<code class="descclassname">housing_prices.transforms.</code><code class="descname">perform_operations</code><span class="sig-paren">(</span><em>df</em>, <em>op</em>, <em>symmetric=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.transforms.perform_operations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform an operation on all 2-variable combinations to create a new feature.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df (DataFrame): The dataframe containing data to rescale.
+op (str): String representing the op to be executed
+symmetric (bool, optional): True implies the operation to combine variables is commutative
+verbose (int, optional): Verbose printing</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: Newly created features</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.transforms.perform_single_op">
+<code class="descclassname">housing_prices.transforms.</code><code class="descname">perform_single_op</code><span class="sig-paren">(</span><em>df1</em>, <em>df2</em>, <em>op</em>, <em>col_name</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.transforms.perform_single_op" title="Permalink to this definition">¶</a></dt>
+<dd><p>Perform a single op on 2 columns to create a new feature.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>df1 (DataFrame): The first variable/feature.
+df2 (DataFrame): The second variable/feature.
+op (str): String representing the op to be executed
+col_name (str): Name of new column
+verbose (int, optional): Verbose printing</dd>
+<dt>Returns:</dt>
+<dd>DataFrame: Newly created feature</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.transforms.rescale">
+<code class="descclassname">housing_prices.transforms.</code><code class="descname">rescale</code><span class="sig-paren">(</span><em>features</em>, <em>scaler=None</em>, <em>scaling_type=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.transforms.rescale" title="Permalink to this definition">¶</a></dt>
+<dd><p>Rescale a variable (e.g. to 0-1, -1-1 normal etc.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>features (DataFrame): The dataframe containing data to rescale.
+scaler (sklearn scaler): If predefined scaler object available
+scalting_type (str): Type of scaler (str) if scaler not specified
+verbose (int, optional): Verbose printing</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>tuple:</dt>
+<dd>DataFrame: All features, with newly transformed features
+Scaler obj: The scaler object used for the transform</dd>
+</dl>
+</dd>
+<dt>Except:</dt>
+<dd>ValueError: If scaling type and scaler are None, invalid etc.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="housing_prices.transforms.transform">
+<code class="descclassname">housing_prices.transforms.</code><code class="descname">transform</code><span class="sig-paren">(</span><em>features</em>, <em>rename=True</em>, <em>replace=False</em>, <em>trans_type=None</em>, <em>scaler=None</em>, <em>symmetric=None</em>, <em>verbose=0</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.transforms.transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>Transform a single variable or combine variables.</p>
+<dl class="docutils">
+<dt>Args:</dt>
+<dd>features (DataFrame): The dataframe containing data to rescale.
+rename (bool, optional): Rename variable using transformation descriptive variable name
+replace (bool, optional): Replace the original variable
+trans_type (str, optional): Type of transformation
+scaler (sklearn scaler object, optional): Scaler to use for transformation
+symmetric (bool, optional): True implies the operation to combine variables is commutative
+verbose (int, optional): Verbose printing</dd>
+<dt>Returns:</dt>
+<dd><dl class="first last docutils">
+<dt>tuple:</dt>
+<dd>DataFrame: All features, with newly transformed features
+Scaler obj: The scaler object used for the transform</dd>
+</dl>
+</dd>
+<dt>Except:</dt>
+<dd>AssertionError: If scaling type and scaler are not consistent.</dd>
+</dl>
+</dd></dl>
+
+<span class="target" id="module-housing_prices.main"></span><dl class="function">
 <dt id="housing_prices.main.main">
-<code class="descclassname">housing_prices.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>path_training</em>, <em>path_test</em>, <em>training_test_seed=None</em>, <em>output_path='./output.csv'</em>, <em>model_type='Lasso'</em>, <em>exclude_misc=False</em>, <em>keep_variables=None</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.main.main" title="Permalink to this definition">¶</a></dt>
+<code class="descclassname">housing_prices.main.</code><code class="descname">main</code><span class="sig-paren">(</span><em>path_training</em>, <em>path_test</em>, <em>training_test_seed=None</em>, <em>output_path='./output.csv'</em>, <em>model_type='ElasticNet'</em>, <em>exclude_misc=False</em>, <em>keep_variables=None</em><span class="sig-paren">)</span><a class="headerlink" href="#housing_prices.main.main" title="Permalink to this definition">¶</a></dt>
 <dd><p>Processes data, predicts housing prices, saves predictions.</p>
 <dl class="docutils">
 <dt>Args:</dt>
@@ -279,7 +431,7 @@ output_path ( str): Location to save predicitions</dd>
 </dl>
 </dd></dl>
 
-<span class="target" id="module-housing_prices.tools"></span></div>
+</div>
 <div class="section" id="indices-and-tables">
 <h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
